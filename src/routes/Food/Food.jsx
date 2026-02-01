@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 
 const DonationField = ({ label, value }) => (
@@ -20,6 +21,7 @@ const Food = () => {
   const navigate = useNavigate();
   const [loaded, setLoaded] = useState(false);
   const [reserved, setReserved] = useState(false);
+  const {authenticated} = useSelector(store => store.Home);
 
   useEffect(() => {
     (async () => {
@@ -39,7 +41,6 @@ const Food = () => {
 
   const handleReserve = async (id) => {
     try {
-      console.log(id);
       const res = await axios.post(
         "http://localhost:3000/reserve",
         { id },
@@ -49,9 +50,10 @@ const Food = () => {
           },
         }
       );
-      console.log(res.data);
       if (res.data.status) {
         setReserved(true);
+      } else {
+        alert("Unable to reserve");
       }
     } catch (err) {
       console.error(err);
@@ -158,7 +160,7 @@ const Food = () => {
               disabled={
                 reserved ||
                 data.status == "Reserved" ||
-                getDaysUntilExpiry(data.expiryDate) < 0
+                getDaysUntilExpiry(data.expiryDate) < 0 || !authenticated
               }
               onClick={() => {
                 handleReserve(data.id);
